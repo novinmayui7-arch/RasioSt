@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Interaktif Rasio Satuan & Pecahan Uang</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#3b82f6',
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                            rose: '#f43f5e',
+                            indigo: '#6366f1',
+                            purple: '#8b5cf6'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .title-font {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+        .money-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            touch-action: manipulation;
+        }
+        .money-card:hover {
+            transform: translateY(-2px);
+        }
+        .drag-over {
+            border-color: #6366f1 !important;
+            background-color: #e0e7ff !important;
+            transform: scale(1.01);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between p-3 md:p-6">
+
+    <!-- HEADER / CONTROLS -->
+    <header class="max-w-7xl mx-auto w-full bg-white rounded-3xl shadow-sm border border-slate-200/90 p-4 md:p-6 mb-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            
+            <!-- Title Section -->
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-md shadow-indigo-200 shrink-0">
+                    <i class="fa-solid fa-calculator text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold title-font text-indigo-950 leading-tight">Media Rasio Satuan & Pecahan Uang</h1>
+                    <p class="text-xs md:text-sm text-slate-500 font-medium">Belajar Pembagian Adil & Penukaran Pecahan Uang</p>
+                </div>
+            </div>
+
+            <!-- Preset & Custom Controls -->
+            <div class="flex flex-wrap items-center gap-2 md:gap-3">
+                <!-- Presets Dropdown -->
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Preset Soal</label>
+                    <select id="presetSelect" onchange="applyPreset()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs md:text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="6-1500-Pensil-✏️">6 Pensil = Rp 1.500 (@ Rp 250)</option>
+                        <option value="6-18000-Pensil-✏️">6 Pensil = Rp 18.000 (@ Rp 3.000)</option>
+                        <option value="4-10000-Buku-📖">4 Buku = Rp 10.000 (@ Rp 2.500)</option>
+                        <option value="5-3500-Jeruk-🍊">5 Jeruk = Rp 3.500 (@ Rp 700)</option>
+                        <option value="3-4500-Donat-🍩">3 Donat = Rp 4.500 (@ Rp 1.500)</option>
+                        <option value="custom">-- Kustom Soal --</option>
+                    </select>
+                </div>
+
+                <!-- Custom Inputs Area -->
+                <div id="customInputs" class="hidden flex items-end gap-2 bg-indigo-50/70 p-2 rounded-2xl border border-indigo-100">
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">Barang</label>
+                        <input type="text" id="customName" value="Pensil" class="w-20 bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">Jumlah</label>
+                        <input type="number" id="customQty" min="1" max="10" value="6" class="w-14 bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">Harga Total (Rp)</label>
+                        <input type="number" id="customPrice" step="100" min="100" value="1500" class="w-24 bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs">
+                    </div>
+                    <button onclick="applyCustom()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">Set</button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-end gap-2 ml-auto">
+                    <button onclick="autoDistribute()" title="Tukarkan pecahan & bagi otomatis" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold px-3.5 py-2 rounded-xl text-xs md:text-sm border border-indigo-200 flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i>
+                        <span>Bagi Otomatis</span>
+                    </button>
+                    <button onclick="resetBoard()" title="Ulangi dari awal" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-2 rounded-xl text-xs md:text-sm border border-slate-300 flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Reset</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Educational Hint Banner -->
+        <div class="mt-2 pt-2 border-t border-slate-100 flex items-start gap-2.5 text-xs md:text-sm text-slate-600 bg-amber-50/80 p-3 rounded-2xl border border-amber-200/70">
+            <i class="fa-solid fa-lightbulb text-amber-500 text-base mt-0.5 shrink-0"></i>
+            <div>
+                <strong>Panduan Guru & Siswa:</strong>
+                <span>Pindahkan 1 barang dan uang pecahan ke kotak di bawah secara adil. Jika nominal uang di papan atas terlalu besar (misal ada lembar Rp 1.000 padahal rasio Rp 250), tekan tombol </span>
+                <span class="inline-flex items-center gap-1 bg-amber-200/80 text-amber-900 font-bold px-2 py-0.5 rounded text-[11px]"><i class="fa-solid fa-scissors text-[10px]"></i> Pecah / Tukar Uang</span>
+                <span>pada uang tersebut!</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN DASHBOARD CONTAINER -->
+    <main class="max-w-7xl mx-auto w-full flex-grow flex flex-col gap-6">
+
+        <!-- TOP BOARDS: ITEMS & MONEY -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- LEFT CONTAINER: ITEMS BOARD -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 flex flex-col">
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">1</span>
+                        <h2 class="font-bold text-slate-800 title-font text-base md:text-lg">Kotak Barang (<span id="itemNameTitle">Pensil</span>)</h2>
+                    </div>
+                    <span id="itemCountBadge" class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full border border-blue-200">
+                        Sisa: <span id="itemRemaining">6</span> buah
+                    </span>
+                </div>
+
+                <!-- Item Source Drop Zone -->
+                <div id="sourceItems" 
+                     ondragover="allowDrop(event)" 
+                     ondrop="dropToSource(event, 'item')" 
+                     class="min-h-[160px] bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-wrap gap-3 items-center justify-center transition-all">
+                    <!-- Items generated dynamically -->
+                </div>
+                <p class="text-center text-[11px] text-slate-400 mt-2">Klik atau Geser barang ke Kotak Satuan di bawah</p>
+            </div>
+
+            <!-- RIGHT CONTAINER: MONEY BOARD WITH DENOMINATIONS & SPLIT FEATURE -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 flex flex-col">
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">2</span>
+                        <h2 class="font-bold text-slate-800 title-font text-base md:text-lg">Kotak Uang (Pecahan & Tukar)</h2>
+                    </div>
+                    <span id="moneyCountBadge" class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">
+                        Total Sisa: Rp <span id="moneyRemainingTotal">1.500</span>
+                    </span>
+                </div>
+
+                <!-- Money Source Drop Zone -->
+                <div id="sourceMoney" 
+                     ondragover="allowDrop(event)" 
+                     ondrop="dropToSource(event, 'money')" 
+                     class="min-h-[160px] bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-3 flex flex-wrap gap-2.5 items-center justify-center transition-all overflow-y-auto max-h-[220px]">
+                    <!-- Money notes & coins generated dynamically -->
+                </div>
+                <p class="text-center text-[11px] text-slate-400 mt-2">Gunakan tombol <i class="fa-solid fa-scissors"></i> pada pecahan uang besar untuk menukarnya menjadi pecahan lebih kecil!</p>
+            </div>
+
+        </div>
+
+        <!-- BOTTOM CONTAINER: UNIT RATE CONTAINERS (KOTAK SATUAN) -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 md:p-6 flex flex-col">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+                <div>
+                    <h2 class="font-bold text-slate-800 title-font text-lg md:text-xl flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-packing text-indigo-600"></i>
+                        Kotak Satuan (Container Per 1 <span id="unitItemLabel">Pensil</span>)
+                    </h2>
+                    <p class="text-xs text-slate-500">Isi tiap kotak dengan 1 unit barang + pecahan uang seharga satuan tersebut</p>
+                </div>
+
+                <!-- Interactive Live Status Banner -->
+                <div id="globalRatioBadge" class="self-start sm:self-auto bg-amber-100 text-amber-800 border border-amber-300 font-semibold text-xs md:text-sm px-4 py-2 rounded-2xl flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span id="statusMessage">Masukkan 1 barang dan pecahan uang seimbang ke tiap kotak.</span>
+                </div>
+            </div>
+
+            <!-- Target Slots Grid Container -->
+            <div id="unitSlotsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <!-- Unit Boxes generated dynamically -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER / FORMULA & CONCLUSION PANEL -->
+    <footer class="max-w-7xl mx-auto w-full mt-6 bg-indigo-950 text-white rounded-3xl p-5 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-start md:items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-800 flex items-center justify-center text-amber-400 text-2xl shrink-0 shadow-inner">
+                <i class="fa-solid fa-square-root-variable"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-base md:text-lg title-font text-indigo-100 flex items-center gap-2">
+                    <span>Rumus Rasio Satuan (Unit Rate):</span>
+                </h3>
+                <div class="text-xs md:text-sm text-indigo-200 mt-1 flex flex-wrap items-center gap-2">
+                    <span class="bg-indigo-900 border border-indigo-700 px-2 py-1 rounded-lg">Harga Satuan = Total Harga ÷ Jumlah Barang</span>
+                    <span class="text-indigo-400">➔</span>
+                    <span id="formulaDetail" class="font-mono bg-indigo-900/80 border border-indigo-700/80 px-2 py-1 rounded-lg text-amber-300">
+                        Rp 1.500 ÷ 6 Pensil = Rp 250 / Pensil
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-right border-t md:border-t-0 border-indigo-800/80 pt-3 md:pt-0 w-full md:w-auto flex md:flex-col justify-between items-center md:items-end">
+            <span class="text-xs text-indigo-300 font-semibold uppercase tracking-wider block">Harga Per Satuan:</span>
+            <span id="unitPriceTag" class="text-2xl md:text-3xl font-extrabold text-amber-400 title-font block">Rp ? / unit</span>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC & SIMULATOR ENGINE -->
+    <script>
+        // State Management
+        let state = {
+            itemName: 'Pensil',
+            itemIcon: '✏️',
+            totalItems: 6,
+            totalPrice: 1500,
+            
+            // Dynamic Money breakdown list: Array of { id, value, location: 'source' | slotIndex }
+            items: [],
+            moneyList: []
+        };
+
+        // Available Denominations for Breakdown logic
+        const DENOMINATIONS = [10000, 5000, 2000, 1000, 500, 200, 100, 50];
+
+        // Sound Effects Synthesizer (Web Audio API)
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function playSound(type) {
+            try {
+                if (!audioCtx) audioCtx = new AudioCtx();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'pop') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'money') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.setValueAtTime(950, now + 0.06);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+                    osc.start(now);
+                    osc.stop(now + 0.09);
+                } else if (type === 'split') {
+                    // Snip / scissor sound simulation
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(1200, now);
+                    osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+                    osc.start(now);
+                    osc.stop(now + 0.06);
+                } else if (type === 'win') {
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.type = 'sine';
+                        o.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        g.gain.setValueAtTime(0.2, now + idx * 0.08);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.2);
+                        o.start(now + idx * 0.08);
+                        o.stop(now + idx * 0.08 + 0.2);
+                    });
+                }
+            } catch (e) {
+                // Audio fallback if unsupported/blocked
+            }
+        }
+
+        // Initialize App
+        window.onload = function() {
+            initGame();
+        };
+
+        function initGame() {
+            // Create Items
+            state.items = Array.from({ length: state.totalItems }, (_, i) => ({
+                id: `item-${Date.now()}-${i}`,
+                type: 'item',
+                location: 'source'
+            }));
+
+            // Generate representative money bills/coins starting from largest optimal denominations
+            state.moneyList = generateOptimalMoneyBreakdown(state.totalPrice);
+
+            // Update Titles
+            document.getElementById('itemNameTitle').innerText = state.itemName;
+            document.getElementById('unitItemLabel').innerText = state.itemName;
+
+            renderAll();
+        }
+
+        // Generate optimal denomination set for initial price
+        function generateOptimalMoneyBreakdown(amount) {
+            let rem = amount;
+            let list = [];
+            let counter = 0;
+
+            for (let denom of DENOMINATIONS) {
+                while (rem >= denom) {
+                    list.push({
+                        id: `money-${Date.now()}-${counter++}`,
+                        type: 'money',
+                        value: denom,
+                        location: 'source'
+                    });
+                    rem -= denom;
+                }
+            }
+            return list;
+        }
+
+        // Presets & Custom Configuration
+        function applyPreset() {
+            const val = document.getElementById('presetSelect').value;
+            const customDiv = document.getElementById('customInputs');
+            
+            if (val === 'custom') {
+                customDiv.classList.remove('hidden');
+                return;
+            } else {
+                customDiv.classList.add('hidden');
+            }
+
+            const [qty, price, name, icon] = val.split('-');
+            state.totalItems = parseInt(qty);
+            state.totalPrice = parseInt(price);
+            state.itemName = name;
+            state.itemIcon = icon;
+
+            initGame();
+        }
+
+        function applyCustom() {
+            const name = document.getElementById('customName').value || 'Barang';
+            const qty = parseInt(document.getElementById('customQty').value) || 5;
+            const price = parseInt(document.getElementById('customPrice').value) || 1500;
+
+            state.itemName = name;
+            state.totalItems = Math.min(Math.max(qty, 1), 10);
+            state.totalPrice = Math.max(price, 100);
+            state.itemIcon = '📦';
+
+            initGame();
+        }
+
+        // RENDER FUNCTIONS
+        function renderAll() {
+            renderSourceItems();
+            renderSourceMoney();
+            renderUnitSlots();
+            updateStatsAndCheckCompletion();
+        }
+
+        function renderSourceItems() {
+            const container = document.getElementById('sourceItems');
+            container.innerHTML = '';
+
+            const sourceItems = state.items.filter(i => i.location === 'source');
+
+            if (sourceItems.length === 0) {
+                container.innerHTML = `<span class="text-xs text-slate-400 font-medium italic">Semua barang telah dimasukkan ke kotak satuan</span>`;
+            } else {
+                sourceItems.forEach(item => {
+                    const el = createItemElement(item);
+                    container.appendChild(el);
+                });
+            }
+
+            document.getElementById('itemRemaining').innerText = sourceItems.length;
+        }
+
+        function renderSourceMoney() {
+            const container = document.getElementById('sourceMoney');
+            container.innerHTML = '';
+
+            const sourceMoney = state.moneyList.filter(m => m.location === 'source');
+            const sourceSum = sourceMoney.reduce((acc, curr) => acc + curr.value, 0);
+
+            if (sourceMoney.length === 0) {
+                container.innerHTML = `<span class="text-xs text-slate-400 font-medium italic">Semua pecahan uang telah dimasukkan</span>`;
+            } else {
+                sourceMoney.forEach(money => {
+                    const el = createMoneyElement(money);
+                    container.appendChild(el);
+                });
+            }
+
+            document.getElementById('moneyRemainingTotal').innerText = sourceSum.toLocaleString('id-ID');
+        }
+
+        function createItemElement(item) {
+            const div = document.createElement('div');
+            div.id = item.id;
+            div.draggable = true;
+            div.ondragstart = (e) => dragStart(e, item.id);
+            div.onclick = () => autoMoveItemToSlot(item);
+            div.className = `money-card bg-amber-50 border-2 border-amber-300 text-amber-900 rounded-2xl p-2 md:p-2.5 flex items-center gap-2 cursor-grab active:cursor-grabbing shadow-xs hover:shadow transition`;
+            div.innerHTML = `
+                <span class="text-xl md:text-2xl">${state.itemIcon}</span>
+                <span class="text-xs font-bold">${state.itemName}</span>
+            `;
+            return div;
+        }
+
+        function createMoneyElement(money) {
+            const div = document.createElement('div');
+            div.id = money.id;
+            div.draggable = true;
+            div.ondragstart = (e) => dragStart(e, money.id);
+            div.onclick = (e) => {
+                // Prevent trigger when clicking the breakdown button
+                if (e.target.closest('.split-btn')) return;
+                autoMoveMoneyToSlot(money);
+            };
+
+            const canBeSplit = getBreakdownDenominations(money.value).length > 0;
+            const isCoin = money.value <= 500;
+
+            let styleClasses = isCoin 
+                ? 'bg-slate-100 border-2 border-slate-300 text-slate-700 rounded-full px-3 py-1.5' 
+                : 'bg-emerald-100 border-2 border-emerald-400 text-emerald-900 rounded-xl px-2.5 py-1.5';
+
+            div.className = `money-card ${styleClasses} flex items-center gap-2 cursor-grab active:cursor-grabbing shadow-xs hover:shadow transition select-none`;
+
+            let icon = isCoin ? '🪙' : '💵';
+            
+            div.innerHTML = `
+                <span class="text-xs">${icon}</span>
+                <span class="text-xs font-extrabold title-font">Rp ${money.value.toLocaleString('id-ID')}</span>
+                ${canBeSplit ? `
+                    <button onclick="breakDownMoney('${money.id}')" title="Pecah Uang menjadi nominal lebih kecil" class="split-btn ml-1 bg-amber-200 hover:bg-amber-300 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-lg border border-amber-400 flex items-center gap-1 transition">
+                        <i class="fa-solid fa-scissors"></i>
+                        <span>Pecah</span>
+                    </button>
+                ` : ''}
+            `;
+            return div;
+        }
+
+        // Return broken down denominations array for a note/coin
+        function getBreakdownDenominations(value) {
+            if (value === 10000) return [5000, 5000];
+            if (value === 5000) return [2000, 2000, 1000];
+            if (value === 2000) return [1000, 1000];
+            if (value === 1000) return [500, 500];
+            if (value === 500) return [200, 200, 100];
+            if (value === 200) return [100, 100];
+            if (value === 100) return [50, 50];
+            return [];
+        }
+
+        // Break down money feature
+        function breakDownMoney(moneyId) {
+            const idx = state.moneyList.findIndex(m => m.id === moneyId);
+            if (idx === -1) return;
+
+            const targetMoney = state.moneyList[idx];
+            const smallerDenoms = getBreakdownDenominations(targetMoney.value);
+
+            if (smallerDenoms.length > 0) {
+                // Remove original note
+                const currentLocation = targetMoney.location;
+                state.moneyList.splice(idx, 1);
+
+                // Insert smaller parts
+                smallerDenoms.forEach((denom, i) => {
+                    state.moneyList.push({
+                        id: `money-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                        type: 'money',
+                        value: denom,
+                        location: currentLocation
+                    });
+                });
+
+                playSound('split');
+                renderAll();
+            }
+        }
+
+        function renderUnitSlots() {
+            const container = document.getElementById('unitSlotsContainer');
+            container.innerHTML = '';
+
+            const unitRate = state.totalPrice / state.totalItems;
+
+            for (let i = 0; i < state.totalItems; i++) {
+                const slotItems = state.items.filter(item => item.location === i);
+                const slotMoney = state.moneyList.filter(money => money.location === i);
+                const slotMoneySum = slotMoney.reduce((acc, curr) => acc + curr.value, 0);
+
+                const slotDiv = document.createElement('div');
+                slotDiv.className = `bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 flex flex-col justify-between transition-all min-h-[220px]`;
+                slotDiv.ondragover = (e) => allowDrop(e, slotDiv);
+                slotDiv.ondragleave = (e) => removeDropHighlight(slotDiv);
+                slotDiv.ondrop = (e) => dropToSlot(e, i, slotDiv);
+
+                // Slot Header
+                let slotHeaderHTML = `
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200 mb-2">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kotak #${i + 1}</span>
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${slotItems.length === 1 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-200 text-slate-600'}">
+                            ${slotItems.length} ${state.itemName}
+                        </span>
+                    </div>
+                `;
+
+                // Dropped Items inside Slot
+                let itemsContent = slotItems.map(item => `
+                    <div onclick="returnToSource('${item.id}', 'item')" title="Klik untuk mengembalikan" class="bg-amber-100 border border-amber-300 text-amber-900 rounded-xl p-1.5 flex items-center justify-center gap-1 cursor-pointer text-xs font-bold shadow-2xs hover:bg-amber-200 transition">
+                        <span>${state.itemIcon}</span>
+                        <span>1 ${state.itemName}</span>
+                    </div>
+                `).join('');
+
+                // Dropped Money inside Slot
+                let moneyContent = slotMoney.map(m => `
+                    <div onclick="returnToSource('${m.id}', 'money')" title="Klik untuk mengembalikan" class="bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-lg px-2 py-0.5 flex items-center justify-between gap-1 cursor-pointer text-[11px] font-bold shadow-2xs hover:bg-emerald-200 transition">
+                        <span>💵 Rp ${m.value.toLocaleString('id-ID')}</span>
+                        <button onclick="event.stopPropagation(); breakDownMoney('${m.id}')" title="Pecah Uang" class="text-[9px] bg-emerald-200 hover:bg-emerald-300 text-emerald-800 px-1 rounded border border-emerald-400">✂️</button>
+                    </div>
+                `).join('');
+
+                // Status Badge logic per box
+                let statusStyle = 'text-slate-400';
+                if (slotItems.length === 1 && slotMoneySum === unitRate) {
+                    statusStyle = 'text-emerald-600 font-extrabold';
+                } else if (slotMoneySum > unitRate || slotItems.length > 1) {
+                    statusStyle = 'text-rose-500 font-bold';
+                } else if (slotMoneySum > 0) {
+                    statusStyle = 'text-indigo-600 font-bold';
+                }
+
+                slotDiv.innerHTML = `
+                    <div>
+                        ${slotHeaderHTML}
+                        <!-- Items Drop Area -->
+                        <div class="min-h-[42px] mb-2 flex flex-wrap gap-1 p-1.5 bg-white rounded-xl border border-slate-100">
+                            ${itemsContent || '<span class="text-[10px] text-slate-300 italic m-auto">Pindahkan 1 barang ke sini</span>'}
+                        </div>
+
+                        <!-- Money Drop Area -->
+                        <div class="min-h-[70px] max-h-[100px] overflow-y-auto flex flex-wrap gap-1 p-1.5 bg-white rounded-xl border border-slate-100">
+                            ${moneyContent || '<span class="text-[10px] text-slate-300 italic m-auto">Pindahkan pecahan uang</span>'}
+                        </div>
+                    </div>
+
+                    <!-- Slot Subtotal -->
+                    <div class="mt-3 pt-2 border-t border-slate-200 text-center">
+                        <span class="text-[10px] text-slate-400 block uppercase font-semibold">Isi Kotak Satuan:</span>
+                        <div class="text-xs ${statusStyle} title-font">
+                            1 ${state.itemName} = Rp ${slotMoneySum.toLocaleString('id-ID')}
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(slotDiv);
+            }
+        }
+
+        // DRAG AND DROP HANDLERS
+        function dragStart(e, id) {
+            e.dataTransfer.setData("text/plain", id);
+            playSound('pop');
+        }
+
+        function allowDrop(e, element) {
+            e.preventDefault();
+            if (element) {
+                element.classList.add('drag-over');
+            }
+        }
+
+        function removeDropHighlight(element) {
+            if (element) {
+                element.classList.remove('drag-over');
+            }
+        }
+
+        function dropToSlot(e, slotIndex, element) {
+            e.preventDefault();
+            removeDropHighlight(element);
+            const id = e.dataTransfer.getData("text/plain");
+
+            moveEntityToSlot(id, slotIndex);
+        }
+
+        function dropToSource(e, type) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData("text/plain");
+            returnToSource(id, type);
+        }
+
+        function moveEntityToSlot(id, slotIndex) {
+            if (id.startsWith('item')) {
+                const item = state.items.find(i => i.id === id);
+                if (item) {
+                    item.location = slotIndex;
+                    playSound('pop');
+                }
+            } else if (id.startsWith('money')) {
+                const money = state.moneyList.find(m => m.id === id);
+                if (money) {
+                    money.location = slotIndex;
+                    playSound('money');
+                }
+            }
+            renderAll();
+        }
+
+        function autoMoveItemToSlot(item) {
+            // Find first slot without an item
+            for (let i = 0; i < state.totalItems; i++) {
+                const count = state.items.filter(it => it.location === i).length;
+                if (count === 0) {
+                    item.location = i;
+                    playSound('pop');
+                    renderAll();
+                    return;
+                }
+            }
+            // Fallback to slot 0
+            item.location = 0;
+            renderAll();
+        }
+
+        function autoMoveMoneyToSlot(money) {
+            // Find slot that needs more money to reach unit rate
+            const targetUnitRate = state.totalPrice / state.totalItems;
+            
+            for (let i = 0; i < state.totalItems; i++) {
+                const currentMoney = state.moneyList.filter(m => m.location === i).reduce((sum, curr) => sum + curr.value, 0);
+                if (currentMoney + money.value <= targetUnitRate) {
+                    money.location = i;
+                    playSound('money');
+                    renderAll();
+                    return;
+                }
+            }
+
+            // Otherwise place in first available slot
+            money.location = 0;
+            playSound('money');
+            renderAll();
+        }
+
+        function returnToSource(id, type) {
+            if (id.startsWith('item') || type === 'item') {
+                const item = state.items.find(i => i.id === id);
+                if (item) item.location = 'source';
+            } else if (id.startsWith('money') || type === 'money') {
+                const money = state.moneyList.find(m => m.id === id);
+                if (money) money.location = 'source';
+            }
+            playSound('pop');
+            renderAll();
+        }
+
+        // AUTOMATIC FAIR DISTRIBUTION ENGINE
+        function autoDistribute() {
+            const unitRate = state.totalPrice / state.totalItems;
+
+            // Step 1: Assign 1 item per slot
+            state.items.forEach((item, index) => {
+                item.location = index % state.totalItems;
+            });
+
+            // Step 2: Regenerate money breakdown into exact unit rate pieces per slot
+            state.moneyList = [];
+            for (let slot = 0; slot < state.totalItems; slot++) {
+                const slotMoneyPieces = generateOptimalMoneyBreakdown(unitRate);
+                slotMoneyPieces.forEach(m => {
+                    m.location = slot;
+                    state.moneyList.push(m);
+                });
+            }
+
+            playSound('win');
+            renderAll();
+        }
+
+        function resetBoard() {
+            initGame();
+        }
+
+        // CALCULATION & VERIFICATION LOGIC
+        function updateStatsAndCheckCompletion() {
+            const itemsInSource = state.items.filter(i => i.location === 'source').length;
+            const moneyInSource = state.moneyList.filter(m => m.location === 'source').length;
+
+            const isAllDistributed = itemsInSource === 0 && moneyInSource === 0;
+            const unitRate = state.totalPrice / state.totalItems;
+
+            // Check equality of each container
+            let isFair = true;
+            for (let i = 0; i < state.totalItems; i++) {
+                const slotItemCount = state.items.filter(item => item.location === i).length;
+                const slotMoneySum = state.moneyList.filter(m => m.location === i).reduce((sum, curr) => sum + curr.value, 0);
+
+                if (slotItemCount !== 1 || slotMoneySum !== unitRate) {
+                    isFair = false;
+                    break;
+                }
+            }
+
+            const statusBadge = document.getElementById('globalRatioBadge');
+            const statusMsg = document.getElementById('statusMessage');
+            const formulaDetail = document.getElementById('formulaDetail');
+            const unitPriceTag = document.getElementById('unitPriceTag');
+
+            // Format formula text
+            formulaDetail.innerText = `Rp ${state.totalPrice.toLocaleString('id-ID')} ÷ ${state.totalItems} ${state.itemName} = Rp ${unitRate.toLocaleString('id-ID')} / ${state.itemName}`;
+
+            if (isAllDistributed && isFair) {
+                statusBadge.className = "bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold text-xs md:text-sm px-4 py-2 rounded-2xl flex items-center gap-2";
+                statusMsg.innerHTML = `🎉 <strong>Sempurna!</strong> Rasio satuan ditemukan: setiap 1 ${state.itemName} bernilai <strong>Rp ${unitRate.toLocaleString('id-ID')}</strong>!`;
+                
+                unitPriceTag.innerText = `Rp ${unitRate.toLocaleString('id-ID')} / ${state.itemName}`;
+
+            } else if (isAllDistributed && !isFair) {
+                statusBadge.className = "bg-rose-100 text-rose-800 border border-rose-300 font-semibold text-xs md:text-sm px-4 py-2 rounded-2xl flex items-center gap-2";
+                statusMsg.innerHTML = `⚠️ Semua item terbagi, namun nilainya <strong>belum adil/seimbang</strong> di tiap kotak! Tekan tombol <i class="fa-solid fa-scissors"></i> untuk pecah uang.`;
+                
+                unitPriceTag.innerText = `Belum Rata`;
+
+            } else {
+                statusBadge.className = "bg-amber-100 text-amber-800 border border-amber-300 font-semibold text-xs md:text-sm px-4 py-2 rounded-2xl flex items-center gap-2";
+                statusMsg.innerText = `Pindahkan 1 barang & pecahan uang seimbang (Rp ${unitRate.toLocaleString('id-ID')}) ke setiap kotak.`;
+
+                unitPriceTag.innerText = `Rp ? / unit`;
+            }
+        }
+    </script>
+</body>
+</html>
